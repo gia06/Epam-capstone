@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { UserRole } from '../models/user.model';
 
 interface JwtInterface {
-  id: number;
+  id: string;
   email: string;
   role: UserRole;
 }

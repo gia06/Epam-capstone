@@ -7,7 +7,7 @@ export enum UserRole {
 }
 
 interface UserAttributes {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   image: string;
@@ -22,7 +22,7 @@ export class User
   extends Model<UserAttributes, Optional<UserAttributes, 'id'>>
   implements UserAttributes
 {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   image: string;
@@ -89,14 +89,8 @@ export class User
   }
 
   static associate(models: Models, sequelize: Sequelize) {
-    // Example of how to define a association.
-    // User.hasMany(models.project, {
-    //   foreignKey: 'user_id'
-    // });
-
-    // User.hasMany(models.feedback, {
-    //   foreignKey:
-    // })
+    User.hasMany(models.feedback, { foreignKey: 'from_user' });
+    User.hasMany(models.feedback, { foreignKey: 'to_user' });
 
     User.hasMany(models.project, {
       foreignKey: 'user_id',

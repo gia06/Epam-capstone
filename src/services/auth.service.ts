@@ -24,10 +24,6 @@ export class AuthService {
     return newUser;
   }
 
-  // async deleteAllUsers(): Promise<void> {
-  //   await this.user.destroy({ where: {} });
-  // }
-
   async findByEmail(email: string): Promise<User> {
     const user = await this.user.findOne({ where: { email } });
     return user;

@@ -2,9 +2,9 @@ import { DataTypes, Model, Optional, Sequelize, UUID } from 'sequelize';
 import { Models } from '../interfaces/general';
 
 interface FeedbackAttributes {
-  id: number;
-  fromUser: number;
-  toUser: number;
+  id: string;
+  fromUser: string;
+  toUser: string;
   content: string;
   companyName: string;
 }
@@ -13,9 +13,9 @@ export class Feedback
   extends Model<FeedbackAttributes, Optional<FeedbackAttributes, 'id'>>
   implements FeedbackAttributes
 {
-  id: number;
-  fromUser: number;
-  toUser: number;
+  id: string;
+  fromUser: string;
+  toUser: string;
   content: string;
   companyName: string;
 
@@ -26,9 +26,6 @@ export class Feedback
     Feedback.init(
       {
         id: {
-          // type: DataTypes.INTEGER.UNSIGNED,
-          // autoIncrement: true,
-          // primaryKey: true,
           type: DataTypes.UUID,
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
@@ -68,6 +65,10 @@ export class Feedback
     // User.hasMany(models.project, {
     //   foreignKey: 'user_id'
     // });
+
+    Feedback.belongsTo(models.user, { foreignKey: 'from_user' });
+    Feedback.belongsTo(models.user, { foreignKey: 'to_user' });
+
     sequelize.sync();
   }
 }

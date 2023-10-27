@@ -3,7 +3,7 @@ import { Models } from '../interfaces/general';
 
 interface ExperienceAttributes {
   id: string;
-  userId: number;
+  userId: string;
   companyName: string;
   role: string;
   startDate: Date;
@@ -16,7 +16,7 @@ export class Experience
   implements ExperienceAttributes
 {
   id: string;
-  userId: number;
+  userId: string;
   companyName: string;
   role: string;
   startDate: Date;

@@ -9,7 +9,9 @@ import { Response, NextFunction } from 'express';
 import { paginate } from '../middleware/paginate';
 import { logger } from '../libs/logger';
 
-export const makeProjectRouter: RouterFactory = ({ services: { projectService } }: Context) => {
+export const makeProjectRouter: RouterFactory = ({
+  services: { projectService, cacheService },
+}: Context) => {
   const router = express.Router();
 
   router.get(
@@ -53,6 +55,7 @@ export const makeProjectRouter: RouterFactory = ({ services: { projectService } 
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         const project = await projectService.create(req.body);
+        await cacheService.delete(project.userId);
 
         logger.info({ id: req.id, message: 'Project created' });
         return res.status(201).json(project);

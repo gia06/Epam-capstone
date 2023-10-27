@@ -6,6 +6,7 @@ import { loadModels } from './models';
 import { loadSequelize } from './sequelize';
 import { config } from '../config';
 import { loadPassport } from './passport';
+import { loadRedis } from './cache';
 import * as dotenv from 'dotenv';
 
 export const loadApp = async () => {
@@ -13,10 +14,11 @@ export const loadApp = async () => {
 
   const app = express();
   const sequelize = loadSequelize(config);
+  const client = loadRedis();
 
   const models = loadModels(sequelize);
 
-  const context = await loadContext(models);
+  const context = await loadContext(models, client);
 
   loadPassport(app, context);
   loadMiddlewares(app, context);

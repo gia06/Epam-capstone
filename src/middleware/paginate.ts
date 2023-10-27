@@ -6,7 +6,8 @@ import { ExtendedRequest } from '../interfaces/express';
 type Service =
   | Context['services']['userService']
   | Context['services']['projectService']
-  | Context['services']['experienceService'];
+  | Context['services']['experienceService']
+  | Context['services']['feedbackService'];
 
 interface QueryParams {
   pageSize?: number;
@@ -33,7 +34,6 @@ export const paginate = (service: Service) => {
       const endIndex = startIndex + pageSize;
       const paginatedData = data.slice(startIndex, endIndex);
 
-      console.log(paginatedData);
       res.locals.data = paginatedData;
 
       res.set('X-total-count', `${paginatedData.length}`);

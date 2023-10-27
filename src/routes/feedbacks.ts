@@ -1,50 +1,53 @@
-import express, { NextFunction, Response } from 'express';
-import { Context } from '../interfaces/general';
-import { RouterFactory } from '../interfaces/general';
-import { ExtendedRequest } from '../interfaces/express';
-import { roles } from '../middleware/roles';
-import { UserRole } from '../models/user.model';
 import { upload } from '../middleware/multer';
-import { paginate } from '../middleware/paginate';
+import { Context, RouterFactory } from '../interfaces/general';
+import express, { NextFunction, Response } from 'express';
+import { ExtendedRequest } from '../interfaces/express';
+import { signJwt } from '../libs/jwt';
 import { logger } from '../libs/logger';
+import { handleValidations } from '../middleware/validation';
+import { paginate } from '../middleware/paginate';
+import { validateFeedbacks } from '../middleware/validation/feedbacks/chain';
+import { UserRole } from '../models/user.model';
+import { roles } from '../middleware/roles';
+import { validUser } from '../middleware/validation/validUser';
+import { validFeedback } from '../middleware/validation/validFeedback';
 
-export const makeExperienceRouter: RouterFactory = ({
-  services: { experienceService, cacheService },
+export const makeFeedbackRouter: RouterFactory = ({
+  services: { feedbackService, userService, cacheService },
 }: Context) => {
   const router = express.Router();
 
   router.get(
     '/',
-    // roles([UserRole.Admin]),
-    paginate(experienceService),
+    roles([UserRole.Admin]),
+    validateFeedbacks(feedbackService).getAll,
+    handleValidations,
+    paginate(feedbackService),
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         logger.info({ id: req.id, message: 'list of experiences loaded' });
         return res.status(200).json(res.locals.data);
       } catch (error) {
-        logger.error({ error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
 
   router.get('/:id', async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try {
-      const exp = await experienceService.findById(req.params.id);
+      const feedback = await feedbackService.findById(req.params.id);
 
-      if (!exp) {
-        logger.error({ id: req.id, message: 'experience not found' });
+      if (!feedback) {
+        logger.error({ id: req.id, message: 'feedback not found' });
         return res.sendStatus(404);
       }
 
-      logger.info({ id: req.id, message: 'Experience loaded' });
+      logger.info({ id: req.id, message: 'feedback loaded' });
       return res.status(200).json({
-        id: exp.id,
-        userId: exp.userId,
-        companyName: exp.companyName,
-        role: exp.role,
-        startDate: exp.startDate,
-        endDate: exp.endDate,
+        fromUser: feedback.fromUser,
+        companyName: feedback.companyName,
+        toUser: feedback.toUser,
+        content: feedback.content,
       });
     } catch (error) {
       logger.error({ id: req.id, error });
@@ -56,13 +59,16 @@ export const makeExperienceRouter: RouterFactory = ({
     '/',
     roles([UserRole.Admin, UserRole.User]),
     upload.single(''),
+    validateFeedbacks(feedbackService, userService).create,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const experience = await experienceService.create(req.body);
-        await cacheService.delete(experience.userId);
+        const feedback = await feedbackService.create(req.body);
+        await cacheService.delete(feedback.fromUser);
+        await cacheService.delete(feedback.toUser);
 
         logger.info({ id: req.id, message: 'experience created' });
-        return res.status(201).json(experience);
+        return res.status(201).json(feedback);
       } catch (error) {
         logger.error({ id: req.id, error });
       }
@@ -73,25 +79,27 @@ export const makeExperienceRouter: RouterFactory = ({
     '/:id',
     roles([UserRole.Admin, UserRole.User]),
     upload.single(''),
+    validateFeedbacks(feedbackService).update,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const exp = await experienceService.findById(req.params.id);
+        const feedback = await feedbackService.findById(req.params.id);
 
-        if (!exp) {
+        if (!feedback) {
           logger.error({ id: req.id, message: 'Experience not found' });
           return res.sendStatus(404);
         }
 
-        const updatedExp = await experienceService.update(req.params.id, req.body);
+        const updatedExp = await feedbackService.update(req.params.id, req.body);
+        const { id, fromUser, companyName, toUser, content } = updatedExp;
 
         logger.error({ id: req.id, message: 'experience updated' });
         return res.status(200).json({
-          id: exp.id,
-          userId: updatedExp.userId,
-          companyName: updatedExp.companyName,
-          role: updatedExp.role,
-          startDate: updatedExp.startDate,
-          endDate: updatedExp.endDate,
+          id,
+          fromUser,
+          companyName,
+          toUser,
+          content,
         });
       } catch (error) {
         logger.error({ id: req.id, error });
@@ -105,14 +113,14 @@ export const makeExperienceRouter: RouterFactory = ({
     roles([UserRole.Admin, UserRole.User]),
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const exp = await experienceService.findById(req.params.id);
+        const exp = await feedbackService.findById(req.params.id);
 
         if (!exp) {
           logger.error({ id: req.id, message: 'Experience not found' });
           return res.sendStatus(404);
         }
 
-        await experienceService.delete(req.params.id);
+        await feedbackService.delete(req.params.id);
 
         res.sendStatus(204);
       } catch (error) {

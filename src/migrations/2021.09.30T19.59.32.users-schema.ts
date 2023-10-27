@@ -6,9 +6,13 @@ export const up: MigrationFn<Sequelize> = async ({ context }) => {
 
   await q.createTable('users', {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      autoIncrement: true,
+      // type: DataTypes.INTEGER.UNSIGNED,
+      // autoIncrement: true,
+      // primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
+      allowNull: false,
     },
     first_name: {
       type: new DataTypes.STRING(128),

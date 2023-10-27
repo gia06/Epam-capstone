@@ -1,25 +1,30 @@
 import { upload } from '../middleware/multer';
 import { Context, RouterFactory } from '../interfaces/general';
-import express, { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Response } from 'express';
 import { ExtendedRequest } from '../interfaces/express';
 import { signJwt } from '../libs/jwt';
 import { logger } from '../libs/logger';
+import { validateAuth } from '../middleware/validation/auth/chain';
+import { handleValidations } from '../middleware/validation';
 
-export const makeAuthRouter: RouterFactory = ({ services }: Context) => {
+export const makeAuthRouter: RouterFactory = ({
+  services: { authService, userService },
+}: Context) => {
   const router = express.Router();
 
   router.post(
     '/register',
     upload.single('avatar'),
+    validateAuth(userService).register,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         const { file } = req;
-        const user = await services.authService.create(req.body, file);
+        const user = await authService.create(req.body, file);
         logger.info({ id: req.id, message: 'user created' });
         return res.status(201).json(user);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -27,18 +32,11 @@ export const makeAuthRouter: RouterFactory = ({ services }: Context) => {
   router.post(
     '/login',
     upload.single(''),
+    validateAuth(userService).login,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const { email, password } = req.body;
-        const user = await services.authService.findByEmail(email);
-        const comparisonResult = await services.authService.comparePassword(
-          password,
-          user.password
-        );
-
-        if (!comparisonResult) {
-          res.sendStatus(401);
-        }
+        const { user } = res.locals;
 
         const token = await signJwt({ id: user.id, email: user.email, role: user.role });
 
@@ -56,8 +54,7 @@ export const makeAuthRouter: RouterFactory = ({ services }: Context) => {
           token,
         });
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
