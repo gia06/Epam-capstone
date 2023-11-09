@@ -6,18 +6,19 @@ class Feedback extends sequelize_1.Model {
     static defineSchema(sequelize) {
         Feedback.init({
             id: {
-                type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
-                autoIncrement: true,
+                type: sequelize_1.DataTypes.UUID,
+                defaultValue: sequelize_1.DataTypes.UUIDV4,
                 primaryKey: true,
+                allowNull: false,
             },
             fromUser: {
                 field: 'from_user',
-                type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+                type: sequelize_1.DataTypes.UUID,
                 allowNull: false,
             },
             toUser: {
                 field: 'to_user',
-                type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+                type: sequelize_1.UUID,
                 allowNull: false,
             },
             content: {
@@ -41,6 +42,9 @@ class Feedback extends sequelize_1.Model {
         // User.hasMany(models.project, {
         //   foreignKey: 'user_id'
         // });
+        Feedback.belongsTo(models.user, { foreignKey: 'from_user' });
+        Feedback.belongsTo(models.user, { foreignKey: 'to_user' });
+        sequelize.sync();
     }
 }
 exports.Feedback = Feedback;

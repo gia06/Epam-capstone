@@ -2,15 +2,13 @@ import { upload } from '../middleware/multer';
 import { Context, RouterFactory } from '../interfaces/general';
 import express, { NextFunction, Response } from 'express';
 import { ExtendedRequest } from '../interfaces/express';
-import { signJwt } from '../libs/jwt';
+import { decodeJwt } from '../libs/jwt';
 import { logger } from '../libs/logger';
 import { handleValidations } from '../middleware/validation';
 import { paginate } from '../middleware/paginate';
 import { validateFeedbacks } from '../middleware/validation/feedbacks/chain';
 import { UserRole } from '../models/user.model';
 import { roles } from '../middleware/roles';
-import { validUser } from '../middleware/validation/validUser';
-import { validFeedback } from '../middleware/validation/validFeedback';
 
 export const makeFeedbackRouter: RouterFactory = ({
   services: { feedbackService, userService, cacheService },
@@ -50,8 +48,7 @@ export const makeFeedbackRouter: RouterFactory = ({
         content: feedback.content,
       });
     } catch (error) {
-      logger.error({ id: req.id, error });
-      res.sendStatus(505);
+      next(error);
     }
   });
 
@@ -63,7 +60,9 @@ export const makeFeedbackRouter: RouterFactory = ({
     handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const feedback = await feedbackService.create(req.body);
+        const { id } = await decodeJwt(req.headers.authorization);
+        const feedback = await feedbackService.create(id, req.body);
+
         await cacheService.delete(feedback.fromUser);
         await cacheService.delete(feedback.toUser);
 
@@ -91,6 +90,7 @@ export const makeFeedbackRouter: RouterFactory = ({
         }
 
         const updatedExp = await feedbackService.update(req.params.id, req.body);
+        await cacheService.delete(feedback.fromUser);
         const { id, fromUser, companyName, toUser, content } = updatedExp;
 
         logger.error({ id: req.id, message: 'experience updated' });
@@ -102,8 +102,7 @@ export const makeFeedbackRouter: RouterFactory = ({
           content,
         });
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -121,11 +120,11 @@ export const makeFeedbackRouter: RouterFactory = ({
         }
 
         await feedbackService.delete(req.params.id);
+        await cacheService.delete(exp.fromUser);
 
         res.sendStatus(204);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );

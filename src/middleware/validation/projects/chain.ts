@@ -1,62 +1,49 @@
 import { check, param, query, ValidationChain } from 'express-validator';
-import { FeedbacksCustomValidators } from './custom';
+import { ProjectsCustomValidators } from './custom';
 import { validateAuth } from '../auth/chain';
 import { UserService } from '../../../services/user.service';
 import { CacheService } from '../../../services/cache.service';
 import { FeedbackService } from '../../../services/feedback.service';
+import { ProjectService } from '../../../services/project.service';
 
 interface Chain {
   getAll: ValidationChain[];
   create: ValidationChain[];
   update: ValidationChain[];
+  delete: ValidationChain[];
 }
 
-export const validateFeedbacks = (
-  feedbackService: FeedbackService,
+export const validateProjects = (
+  projectService: ProjectService,
   userService?: UserService,
   cacheService?: CacheService
 ): Chain => {
-  const customValidators = new FeedbacksCustomValidators(
-    feedbackService,
-    userService,
-    cacheService
-  );
-
-  // const create = validateAuth(feedbackService).register;
+  const customValidators = new ProjectsCustomValidators(projectService, userService, cacheService);
 
   return {
     getAll: [query('pageSize').custom(customValidators.pageSize())],
     create: [
-      check('fromUser')
+      check('projectName')
         .notEmpty()
-        .withMessage('fromUser field is required')
-        .custom(customValidators.fromUser()),
-      check('companyName')
+        .withMessage('projectName field is required')
+        .custom(customValidators.create()),
+      check('description')
         .notEmpty()
-        .withMessage('companyName field is required')
+        .withMessage('description field is required')
         .isLength({ max: 50 })
         .withMessage('max length for companyName is 50'),
-      check('toUser')
-        .notEmpty()
-        .withMessage('toUser field is required')
-        .custom(customValidators.toUser()),
-      check('content')
-        .notEmpty()
-        .withMessage('field content is required')
-        .isLength({ max: 128 })
-        .withMessage('max length for content is 128'),
     ],
     update: [
-      check('fromUser')
+      check('projectName')
         .notEmpty()
-        .withMessage('fromUser field is required')
-        .custom(customValidators.fromUser()),
-      check('companyName').notEmpty().withMessage('companyName field is required'),
-      check('toUser')
+        .withMessage('projectName field is required')
+        .custom(customValidators.create()),
+      check('description')
         .notEmpty()
-        .withMessage('toUser field is required')
-        .custom(customValidators.toUser()),
-      check('content').notEmpty().withMessage('field content is required'),
+        .withMessage('description field is required')
+        .isLength({ max: 50 })
+        .withMessage('max length for companyName is 50'),
     ],
+    delete: [param('id').custom(customValidators.updateId)],
   };
 };

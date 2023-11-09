@@ -6,13 +6,14 @@ class Project extends sequelize_1.Model {
     static defineSchema(sequelize) {
         Project.init({
             id: {
-                type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+                type: sequelize_1.DataTypes.UUID,
+                defaultValue: sequelize_1.DataTypes.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true,
+                allowNull: false,
             },
             userId: {
                 field: 'user_id',
-                type: sequelize_1.DataTypes.INTEGER,
+                type: sequelize_1.DataTypes.UUID,
                 allowNull: false,
             },
             image: {
@@ -30,6 +31,7 @@ class Project extends sequelize_1.Model {
             underscored: true,
             sequelize,
         });
+        sequelize.sync();
     }
     static associate(models, sequelize) {
         // Example of how to define a association.
@@ -39,6 +41,7 @@ class Project extends sequelize_1.Model {
         Project.belongsTo(models.user, {
             foreignKey: 'user_id',
         });
+        sequelize.sync();
     }
 }
 exports.Project = Project;

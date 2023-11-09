@@ -34,7 +34,7 @@ export const makeUsersRouter: RouterFactory = ({
 
   router.get('/:id', async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try {
-      const { user } = res.locals;
+      const user = await userService.findById(req.params.id);
 
       if (!user) {
         logger.error({ id: req.id, message: 'User not found' });
@@ -68,8 +68,7 @@ export const makeUsersRouter: RouterFactory = ({
 
         return res.status(200).json(cv);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -99,8 +98,7 @@ export const makeUsersRouter: RouterFactory = ({
           role: user.role,
         });
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -125,8 +123,7 @@ export const makeUsersRouter: RouterFactory = ({
         logger.info({ id: req.id, message: 'User updated' });
         return res.status(200).json(updatedUser);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -152,9 +149,7 @@ export const makeUsersRouter: RouterFactory = ({
         logger.info({ id: req.id, message: 'User deleted' });
         return res.sendStatus(204);
       } catch (error) {
-        logger.error({ id: req.id, error });
-
-        res.sendStatus(505);
+        next(error);
       }
     }
   );

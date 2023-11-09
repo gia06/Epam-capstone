@@ -15,9 +15,10 @@ const up = ({ context }) => __awaiter(void 0, void 0, void 0, function* () {
     const q = context.getQueryInterface();
     yield q.createTable('users', {
         id: {
-            type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
-            autoIncrement: true,
+            type: sequelize_1.DataTypes.UUID,
+            defaultValue: sequelize_1.DataTypes.UUIDV4,
             primaryKey: true,
+            allowNull: false,
         },
         first_name: {
             type: new sequelize_1.DataTypes.STRING(128),

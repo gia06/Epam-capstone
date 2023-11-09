@@ -7,7 +7,7 @@ import { RedisClient } from 'redis';
 import { CacheService } from '../services/cache.service';
 import { FeedbackService } from '../services/feedback.service';
 
-export const loadContext = async (models: Models, client: RedisClient): Promise<Context> => {
+export const loadContext = async (models: Models, redisClient: RedisClient): Promise<Context> => {
   return {
     services: {
       authService: new AuthService(models.user),
@@ -15,7 +15,7 @@ export const loadContext = async (models: Models, client: RedisClient): Promise<
       experienceService: new ExperienceService(models.experience),
       projectService: new ProjectService(models.project),
       feedbackService: new FeedbackService(models.feedback),
-      cacheService: new CacheService(client),
+      cacheService: new CacheService(redisClient),
     },
   };
 };

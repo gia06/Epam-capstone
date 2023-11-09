@@ -6,6 +6,7 @@ interface ProjectAttributes {
   userId: string;
   image: string;
   description: string;
+  projectName: string;
 }
 
 export class Project
@@ -16,6 +17,7 @@ export class Project
   userId: string;
   image: string;
   description: string;
+  projectName: string;
 
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -32,6 +34,11 @@ export class Project
         userId: {
           field: 'user_id',
           type: DataTypes.UUID,
+          allowNull: false,
+        },
+        projectName: {
+          field: 'project_name',
+          type: DataTypes.STRING(),
           allowNull: false,
         },
         image: {

@@ -1,4 +1,4 @@
-import { Avatar } from '../interfaces/general';
+import { File } from '../interfaces/general';
 import { comparePassword } from '../libs/bcrypt';
 import { generateHash } from '../libs/bcrypt';
 import { UserRole } from '../models/user.model';
@@ -15,7 +15,7 @@ export class AuthService {
     return await this.user.findAll();
   }
 
-  async create(user: User, avatar: Avatar): Promise<User> {
+  async create(user: User, avatar: File): Promise<User> {
     const newUser = this.user.build(user);
     newUser.role = UserRole.User;
     newUser.password = await generateHash(user.password);

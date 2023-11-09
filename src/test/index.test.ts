@@ -1,13 +1,19 @@
 import request from 'supertest';
-import { testApp } from '..';
+// import { testApp } from '..';
 import { Application } from 'express';
+import { loadApp } from '../loaders/app';
 
 describe('testing application', () => {
   let server: Application;
   const baseUrl: string = `/api`;
 
   beforeAll(async () => {
-    server = await testApp();
+    (async () => {
+      const app = await loadApp();
+
+      app.listen(3001);
+    })();
+    // server = await testApp();
   });
 
   // afterAll(() => {

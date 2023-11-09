@@ -14,11 +14,11 @@ export const loadApp = async () => {
 
   const app = express();
   const sequelize = loadSequelize(config);
-  const client = loadRedis();
+  const redisClient = loadRedis();
 
   const models = loadModels(sequelize);
 
-  const context = await loadContext(models, client);
+  const context = await loadContext(models, redisClient);
 
   loadPassport(app, context);
   loadMiddlewares(app, context);

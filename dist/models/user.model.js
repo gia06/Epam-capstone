@@ -11,9 +11,10 @@ class User extends sequelize_1.Model {
     static defineSchema(sequelize) {
         User.init({
             id: {
-                type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
-                autoIncrement: true,
+                type: sequelize_1.DataTypes.UUID,
+                defaultValue: sequelize_1.DataTypes.UUIDV4,
                 primaryKey: true,
+                allowNull: false,
             },
             firstName: {
                 field: 'first_name',
@@ -27,7 +28,7 @@ class User extends sequelize_1.Model {
             },
             image: {
                 type: new sequelize_1.DataTypes.STRING(256),
-                allowNull: false,
+                allowNull: true,
             },
             title: {
                 type: new sequelize_1.DataTypes.STRING(256),
@@ -54,21 +55,18 @@ class User extends sequelize_1.Model {
             underscored: true,
             sequelize,
         });
+        sequelize.sync();
     }
     static associate(models, sequelize) {
-        // Example of how to define a association.
-        // User.hasMany(models.project, {
-        //   foreignKey: 'user_id'
-        // });
-        // User.hasMany(models.feedback, {
-        //   foreignKey:
-        // })
+        User.hasMany(models.feedback, { foreignKey: 'from_user' });
+        User.hasMany(models.feedback, { foreignKey: 'to_user' });
         User.hasMany(models.project, {
             foreignKey: 'user_id',
         });
         User.hasMany(models.experience, {
             foreignKey: 'user_id',
         });
+        sequelize.sync();
     }
 }
 exports.User = User;

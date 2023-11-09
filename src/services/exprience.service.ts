@@ -11,9 +11,9 @@ export class ExperienceService {
     return await this.experience.findAll();
   }
 
-  async create(exp: Experience) {
+  async create(userId: string, exp: Experience) {
     try {
-      const newExp = this.experience.build(exp);
+      const newExp = this.experience.build({ userId, ...exp });
       await newExp.save();
       return newExp;
     } catch (err) {

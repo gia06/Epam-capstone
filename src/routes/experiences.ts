@@ -7,6 +7,9 @@ import { UserRole } from '../models/user.model';
 import { upload } from '../middleware/multer';
 import { paginate } from '../middleware/paginate';
 import { logger } from '../libs/logger';
+import { validateExperiences } from '../middleware/validation/experiences/chain';
+import { handleValidations } from '../middleware/validation';
+import { decodeJwt } from '../libs/jwt';
 
 export const makeExperienceRouter: RouterFactory = ({
   services: { experienceService, cacheService },
@@ -15,6 +18,7 @@ export const makeExperienceRouter: RouterFactory = ({
 
   router.get(
     '/',
+    //  TODO: Should be enabled for final version
     // roles([UserRole.Admin]),
     paginate(experienceService),
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
@@ -47,8 +51,7 @@ export const makeExperienceRouter: RouterFactory = ({
         endDate: exp.endDate,
       });
     } catch (error) {
-      logger.error({ id: req.id, error });
-      res.sendStatus(505);
+      next(error);
     }
   });
 
@@ -56,15 +59,18 @@ export const makeExperienceRouter: RouterFactory = ({
     '/',
     roles([UserRole.Admin, UserRole.User]),
     upload.single(''),
+    validateExperiences(experienceService).create,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const experience = await experienceService.create(req.body);
+        const { id } = await decodeJwt(req.headers.authorization);
+        const experience = await experienceService.create(id, req.body);
         await cacheService.delete(experience.userId);
 
         logger.info({ id: req.id, message: 'experience created' });
         return res.status(201).json(experience);
       } catch (error) {
-        logger.error({ id: req.id, error });
+        next(error);
       }
     }
   );
@@ -73,6 +79,8 @@ export const makeExperienceRouter: RouterFactory = ({
     '/:id',
     roles([UserRole.Admin, UserRole.User]),
     upload.single(''),
+    validateExperiences(experienceService).update,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         const exp = await experienceService.findById(req.params.id);
@@ -83,6 +91,7 @@ export const makeExperienceRouter: RouterFactory = ({
         }
 
         const updatedExp = await experienceService.update(req.params.id, req.body);
+        await cacheService.delete(exp.userId);
 
         logger.error({ id: req.id, message: 'experience updated' });
         return res.status(200).json({
@@ -94,8 +103,7 @@ export const makeExperienceRouter: RouterFactory = ({
           endDate: updatedExp.endDate,
         });
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -103,6 +111,8 @@ export const makeExperienceRouter: RouterFactory = ({
   router.delete(
     '/:id',
     roles([UserRole.Admin, UserRole.User]),
+    validateExperiences(experienceService).delete,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         const exp = await experienceService.findById(req.params.id);
@@ -113,11 +123,11 @@ export const makeExperienceRouter: RouterFactory = ({
         }
 
         await experienceService.delete(req.params.id);
+        await cacheService.delete(exp.userId);
 
         res.sendStatus(204);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );

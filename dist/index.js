@@ -9,9 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.testApp = void 0;
 const app_1 = require("./loaders/app");
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    const app = yield (0, app_1.loadApp)();
-    app.listen(3001, () => console.log(`Application is running on http://localhost:3001`));
-}))();
+// (async () => {
+//   const app = await loadApp();
+//   app.listen(3001, () => logger.info(`Application is running on http://localhost:3001`));
+// })();
+const testApp = () => {
+    return new Promise((resolve) => __awaiter(void 0, void 0, void 0, function* () {
+        const server = yield (0, app_1.loadApp)();
+        server.listen(0, () => {
+            console.log('Express server is listening on http://localhost:3000');
+            resolve(server);
+        });
+    }));
+};
+exports.testApp = testApp;
 //# sourceMappingURL=index.js.map

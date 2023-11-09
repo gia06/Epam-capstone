@@ -1,6 +1,5 @@
-import { comparePassword, generateHash } from '../libs/bcrypt';
-import { User, UserRole } from '../models/user.model';
-import { Avatar } from '../interfaces/general';
+import { generateHash } from '../libs/bcrypt';
+import { User } from '../models/user.model';
 import { AuthService } from './auth.service';
 import { Project } from '../models/project.model';
 import { Experience } from '../models/experience.model';

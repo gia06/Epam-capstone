@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import path from 'path';
 import { ExtendedRequest } from '../interfaces/express';
 import { logger } from '../libs/logger';
+import { decodeJwt } from '../libs/jwt';
 
 const mkdir = promisify(fs.mkdir);
 const readDir = promisify(fs.readdir);
@@ -28,17 +29,17 @@ const createUserDirectory = async (originalName: string, dirName: string) => {
   }
 };
 
-const createImageDirectory = async (userDirectory: string, imageName: string) => {
+const createProjectImage = async (userDirectory: string, imageName: string) => {
   try {
     const userPath = path.join(__dirname, `../../public/${userDirectory}`);
 
-    await mkdir(`${userPath}/projects/${imageName}`);
+    await mkdir(`${userPath}/projects`);
   } catch (err) {
     logger.error(err);
   }
 };
 
-const deleteImage = async (userDirectory: string, imageName: string) => {
+export const deleteProjectImage = async (userDirectory: string, imageName: string) => {
   await unlink(path.join(__dirname, `../../public/${userDirectory}/projects/${imageName}`));
 };
 
@@ -57,4 +58,22 @@ const storage = multer.diskStorage({
   },
 });
 
+const projectStorage = multer.diskStorage({
+  destination: async (req: ExtendedRequest, file, cb) => {
+    const { email } = await decodeJwt(req.headers.authorization);
+    await createProjectImage(email, req.body.projectName);
+    cb(null, `public/${email}/projects`);
+  },
+  filename: (req, file, cb) => {
+    const lastIndex = file.originalname.lastIndexOf('.');
+    const extension = file.originalname.slice(lastIndex);
+    if (req.body.projectName) {
+      return cb(null, `${req.body.projectName}${extension}`);
+    }
+    cb(new Error('no projectName'), null);
+  },
+});
+
 export const upload = multer({ storage });
+
+export const projectUpload = multer({ storage: projectStorage });

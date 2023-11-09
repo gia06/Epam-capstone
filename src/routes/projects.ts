@@ -1,13 +1,17 @@
 import express from 'express';
 import { Context } from '../interfaces/general';
 import { RouterFactory } from '../interfaces/general';
-import { upload } from '../middleware/multer';
+import { deleteProjectImage, projectUpload, upload } from '../middleware/multer';
 import { UserRole } from '../models/user.model';
 import { roles } from '../middleware/roles';
 import { ExtendedRequest } from '../interfaces/express';
 import { Response, NextFunction } from 'express';
 import { paginate } from '../middleware/paginate';
 import { logger } from '../libs/logger';
+import { decodeJwt } from '../libs/jwt';
+import { decode } from 'punycode';
+import { validateProjects } from '../middleware/validation/projects/chain';
+import { handleValidations } from '../middleware/validation';
 
 export const makeProjectRouter: RouterFactory = ({
   services: { projectService, cacheService },
@@ -16,15 +20,14 @@ export const makeProjectRouter: RouterFactory = ({
 
   router.get(
     '/',
-    // roles([UserRole.Admin]),
+    roles([UserRole.Admin, UserRole.User]),
     paginate(projectService),
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         logger.info({ id: req.id, message: 'Projects loaded' });
         return res.status(200).json(res.locals.data);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -44,24 +47,25 @@ export const makeProjectRouter: RouterFactory = ({
       logger.error({ id: req.id, message: 'Project loaded' });
       return res.status(200).json({ id, userId, image, description });
     } catch (error) {
-      logger.error({ id: req.id, error });
-      res.sendStatus(505);
+      next(error);
     }
   });
 
   router.post(
     '/',
-    upload.single(''),
+    projectUpload.single('image'),
+    validateProjects(projectService).create,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
-        const project = await projectService.create(req.body);
+        const { id } = await decodeJwt(req.headers.authorization);
+        const project = await projectService.create(id, req.body, req.file);
         await cacheService.delete(project.userId);
 
         logger.info({ id: req.id, message: 'Project created' });
         return res.status(201).json(project);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -70,6 +74,8 @@ export const makeProjectRouter: RouterFactory = ({
     '/:id',
     roles([UserRole.Admin, UserRole.User]),
     upload.single(''),
+    validateProjects(projectService).update,
+    handleValidations,
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         const project = await projectService.findById(req.params.id);
@@ -91,8 +97,7 @@ export const makeProjectRouter: RouterFactory = ({
           description,
         });
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );
@@ -108,14 +113,15 @@ export const makeProjectRouter: RouterFactory = ({
           logger.error({ id: req.id, message: 'Project not found' });
           return res.sendStatus(404);
         }
+        const { email } = await decodeJwt(req.headers.authorization);
 
         logger.info({ id: req.id, message: 'Project deleted' });
         await projectService.delete(req.params.id);
+        await deleteProjectImage(email, project.projectName);
 
         res.sendStatus(204);
       } catch (error) {
-        logger.error({ id: req.id, error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );

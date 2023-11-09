@@ -32,7 +32,7 @@ export interface Models {
   experience: typeof Experience;
 }
 
-export interface Avatar {
+export interface File {
   fieldname: string;
   originalname: string;
   encoding: string;

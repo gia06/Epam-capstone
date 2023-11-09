@@ -7,8 +7,8 @@ export class FeedbackService {
     this.feedback = project;
   }
 
-  async create(project: Feedback) {
-    const newProject = this.feedback.build(project);
+  async create(fromUser: string, project: Feedback) {
+    const newProject = this.feedback.build({ fromUser, ...project });
 
     await newProject.save();
     return newProject;

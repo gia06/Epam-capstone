@@ -16,6 +16,11 @@ export const up: MigrationFn<Sequelize> = async ({ context }) => {
       type: DataTypes.UUID,
       allowNull: false,
     },
+    projectName: {
+      field: 'project_name',
+      type: DataTypes.STRING(),
+      allowNull: false,
+    },
     image: {
       field: 'image',
       type: DataTypes.STRING(256),

@@ -40,7 +40,7 @@ export const makeAuthRouter: RouterFactory = ({
 
         const token = await signJwt({ id: user.id, email: user.email, role: user.role });
 
-        logger.info({ id: req.id, message: 'user logged in' });
+        logger.info({ id: req.id, message: `${user.role} logged in` });
         return res.status(200).json({
           user: {
             id: user.id,

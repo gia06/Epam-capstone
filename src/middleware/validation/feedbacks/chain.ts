@@ -9,6 +9,7 @@ interface Chain {
   getAll: ValidationChain[];
   create: ValidationChain[];
   update: ValidationChain[];
+  delete: ValidationChain[];
 }
 
 export const validateFeedbacks = (
@@ -22,15 +23,9 @@ export const validateFeedbacks = (
     cacheService
   );
 
-  // const create = validateAuth(feedbackService).register;
-
   return {
     getAll: [query('pageSize').custom(customValidators.pageSize())],
     create: [
-      check('fromUser')
-        .notEmpty()
-        .withMessage('fromUser field is required')
-        .custom(customValidators.fromUser()),
       check('companyName')
         .notEmpty()
         .withMessage('companyName field is required')
@@ -47,10 +42,7 @@ export const validateFeedbacks = (
         .withMessage('max length for content is 128'),
     ],
     update: [
-      check('fromUser')
-        .notEmpty()
-        .withMessage('fromUser field is required')
-        .custom(customValidators.fromUser()),
+      param('id').custom(customValidators.updateId),
       check('companyName').notEmpty().withMessage('companyName field is required'),
       check('toUser')
         .notEmpty()
@@ -58,5 +50,6 @@ export const validateFeedbacks = (
         .custom(customValidators.toUser()),
       check('content').notEmpty().withMessage('field content is required'),
     ],
+    delete: [param('id').custom(customValidators.updateId)],
   };
 };
