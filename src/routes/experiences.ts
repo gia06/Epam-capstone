@@ -18,16 +18,14 @@ export const makeExperienceRouter: RouterFactory = ({
 
   router.get(
     '/',
-    //  TODO: Should be enabled for final version
-    // roles([UserRole.Admin]),
+    roles([UserRole.Admin]),
     paginate(experienceService),
     async (req: ExtendedRequest, res: Response, next: NextFunction) => {
       try {
         logger.info({ id: req.id, message: 'list of experiences loaded' });
         return res.status(200).json(res.locals.data);
       } catch (error) {
-        logger.error({ error });
-        res.sendStatus(505);
+        next(error);
       }
     }
   );

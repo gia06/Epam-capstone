@@ -69,7 +69,7 @@ export const makeFeedbackRouter: RouterFactory = ({
         logger.info({ id: req.id, message: 'experience created' });
         return res.status(201).json(feedback);
       } catch (error) {
-        logger.error({ id: req.id, error });
+        next(error);
       }
     }
   );

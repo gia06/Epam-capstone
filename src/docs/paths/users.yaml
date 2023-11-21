@@ -1,0 +1,267 @@
+userSchema: &userSchema
+  firstName:
+    type: string
+    example: name
+  lastName:
+    type: string
+    example: lastname
+  title:
+    type: string
+    example: title
+  summary:
+    type: string
+    example: summary
+  email:
+    type: string
+    example: 'example@example.com'
+  password:
+    type: string
+    example: 'examplePassword'
+  avatar:
+    type: image
+    example: testImage
+
+userExample: &userExample
+  firstName:
+    type: string
+    example: name
+  lastName:
+    type: string
+    example: lastname
+  title:
+    type: string
+    example: title
+  summary:
+    type: string
+    example: summary
+  email:
+    type: string
+    example: 'example@example.com'
+  password:
+    type: string
+    example: 'examplePassword'
+  avatar:
+    type: image
+    example: testImage
+
+/users:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get list of registered Users
+    description: Can be accessed only by Admin user.
+    headers:
+      X-total-count:
+        schema:
+          type: integer
+        description: Number of Users returned when pageSize and page parameters was provided.
+    parameters:
+      - in: query
+        name: pageSize
+        schema:
+          type: integer
+        required: false
+        description: Numeric value of size of the users on single page.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        required: false
+        description: Numeric value of the page. Required only if pageSize was provided.
+    tags:
+      - users
+    responses:
+      200:
+        description: Users were successfully returned. An empty array is returned if there are no users.
+        content:
+          multipart/form-data:
+            schema:
+              <<: *userSchema
+              example:
+                users:
+                  - id:
+                      type: string
+                      example: 8e4f5b60-fc95-4d9a-82a9-cf8588e838cf
+                    <<: *userExample
+                  - id:
+                      type: string
+                      example: 8e4f5b60-fc95-4d9a-82a9-cf8588eg4j71
+                    <<: *userExample
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      505:
+        description: Something went wrong on the server.
+
+  post:
+    security:
+      - bearerAuth: []
+    summary: Add new User
+    description: Can be accessed only by Admin user.
+    requestBody:
+      description: Content of the User
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              <<: *userSchema
+      required: true
+    tags:
+      - users
+    responses:
+      201:
+        description: A new User was successfully created.
+        content:
+          multipart/form-data:
+            schema:
+              <<: *userSchema
+            example:
+              id:
+                type: string
+                example: 4d65ebcb-a339-4af2-97fb-1a741de66c7d
+              <<: *userExample
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      505:
+        description: Something went wrong on the server.
+
+/users/{id}:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get a single user by specified id.
+    description: can be accessed only by authenticated users
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the User to get.
+    tags:
+      - users
+    responses:
+      200:
+        description: User successfully get returned.
+        content:
+          multipart/form-data:
+            schema:
+            type: object
+            properties:
+              <<: *userSchema
+            example:
+              - <<: *userExample
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: User with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+  put:
+    security:
+      - bearerAuth: []
+    summary: Update Single User with specified id.
+    description: Can be accessed only by user who owns specified account.
+    requestBody:
+      description: content of the User
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              <<: *userSchema
+      required: true
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the user to get.
+    tags:
+      - users
+    responses:
+      200:
+        description: User successfully updated.
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: User with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+  delete:
+    security:
+      - bearerAuth: []
+    summary: Delete Single User with specified id.
+    description: Can be accessed only by user who owns specified account or an Admin.
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the user to get.
+    tags:
+      - users
+    responses:
+      204:
+        description: User successfully deleted.
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: User with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+/users/{userId}/cv:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get a CV of single user by specified id.
+    description: Can be accessed only by authenticated users.
+    parameters:
+      - in: path
+        name: userId
+        schema:
+          type: string
+        required: true
+        description: ID of the User to get.
+    tags:
+      - cv
+    responses:
+      200:
+        description: User successfully get returned.
+        content:
+          multipart/form-data:
+            schema:
+            type: object
+            properties:
+              <<: *userSchema
+              projects:
+                type: array
+                example: []
+              experiences:
+                type: array
+                example: []
+            example:
+              - <<: *userExample
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: User with specified id was not found.
+      505:
+        description: Something went wrong on the server.

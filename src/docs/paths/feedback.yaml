@@ -1,0 +1,193 @@
+feedSchema: &feedSchema
+  fromUser:
+    type: string
+    example: 55545b74-97d2-4abd-a1e1-0ac0690461e6
+  companyName:
+    type: string
+    example: Meta
+  toUser:
+    type: string
+    example: 55545b74-97d2-4abd-a1e1-0ac069j2hd89
+  content:
+    type: string
+    example: content of the feedback
+
+/feedback:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get list of stored Feedbacks.
+    description: Can be accessed only by Admin user.
+    parameters:
+      - in: query
+        name: pageSize
+        schema:
+          type: integer
+        required: false
+        description: Numeric value of size of the Feedback objects on single page.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        required: false
+        description: Numeric value of the page. Required only if pageSize was provided.
+    tags:
+      - feedbacks
+    responses:
+      200:
+        description: Feedbacks were successfully returned. An empty array is returned if there are no Feedbacks.
+        headers:
+          X-total-count:
+            schema:
+              type: integer
+            description: Number of Feedbacks returned when pageSize and page parameters was provided.
+        content:
+          multipart/form-data:
+            schema:
+              <<: *feedSchema
+              example:
+                - id:
+                    type: string
+                    example: 2cedba36-382f-4ce9-87c6-24d6d2a76606
+                  <<: *feedSchema
+                - id:
+                    type: string
+                    example: 2cedba36-382f-4ce9-87c6-24d6d2ash51k
+                  <<: *feedSchema
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      505:
+        description: Something went wrong on the server.
+
+  post:
+    security:
+      - bearerAuth: []
+    summary: Add new Feedback
+    description: Can be accessed only by Authenticated user.
+    requestBody:
+      description: Content of the Feedback
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              <<: *feedSchema
+      required: true
+    tags:
+      - feedbacks
+    responses:
+      201:
+        description: A new Feedback was successfully created.
+        content:
+          multipart/form-data:
+            schema:
+              <<: *feedSchema
+            example:
+              id:
+                type: string
+                example: 4d65ebcb-a339-4af2-97fb-1a741de66c7d
+              <<: *feedSchema
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      505:
+        description: Something went wrong on the server.
+
+/feedback/{id}:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get a single Feedback by specified id.
+    description: can be accessed only by authenticated users
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the User to get.
+    tags:
+      - feedbacks
+    responses:
+      200:
+        description: Feedback successfully get returned.
+        content:
+          multipart/form-data:
+            schema:
+            type: object
+            properties:
+              <<: *feedSchema
+            example:
+              - <<: *feedSchema
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: Feedback with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+  put:
+    security:
+      - bearerAuth: []
+    summary: Update Single Feedback with specified id.
+    description: Can be accessed only by user who owns specified account or Admin.
+    requestBody:
+      description: content of the Feedback
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              <<: *feedSchema
+      required: true
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the user to get.
+    tags:
+      - feedbacks
+    responses:
+      200:
+        description: Feedback successfully updated.
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: Feedback with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+  delete:
+    security:
+      - bearerAuth: []
+    summary: Delete Single Feedback with specified id.
+    description: Can be accessed only by user who owns specified account or an Admin.
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the Feedbacks to get.
+    tags:
+      - feedbacks
+    responses:
+      204:
+        description: Feedback successfully deleted.
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: Feedback with specified id was not found.
+      505:
+        description: Something went wrong on the server.

@@ -25,9 +25,8 @@ export const makeUsersRouter: RouterFactory = ({
       try {
         logger.info({ id: req.id, message: 'Users loaded' });
         return res.status(200).json(res.locals.data);
-      } catch (err) {
-        logger.info(err);
-        res.sendStatus(505);
+      } catch (error) {
+        next(error);
       }
     }
   );
@@ -52,8 +51,7 @@ export const makeUsersRouter: RouterFactory = ({
         role: user.role,
       });
     } catch (error) {
-      logger.error({ id: req.id, error });
-      res.sendStatus(505);
+      next(error);
     }
   });
 

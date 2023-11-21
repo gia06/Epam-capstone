@@ -1,0 +1,190 @@
+projectSchema: &projectSchema
+  projectName:
+    type: string
+    example: social-network-API
+  image:
+    type: string
+    example: image.jpg
+  description:
+    type: string
+    example: API for social network to communicate between users.
+
+/projects:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get list of stored Projects.
+    description: Can be accessed only by Admin user.
+    parameters:
+      - in: query
+        name: pageSize
+        schema:
+          type: integer
+        required: false
+        description: Numeric value of size of the Project objects on single page.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        required: false
+        description: Numeric value of the page. Required only if pageSize was provided.
+    tags:
+      - projects
+    responses:
+      200:
+        description: Projects were successfully returned. An empty array is returned if there are no Projects.
+        headers:
+          X-total-count:
+            schema:
+              type: integer
+            description: Number of Projects returned when pageSize and page parameters was provided.
+        content:
+          multipart/form-data:
+            schema:
+              <<: *projectSchema
+              example:
+                - id:
+                    type: string
+                    example: 2cedba36-382f-4ce9-87c6-24d6d2a76606
+                  <<: *projectSchema
+                - id:
+                    type: string
+                    example: 2cedba36-382f-4ce9-87c6-24d6d2ash51k
+                  <<: *projectSchema
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      505:
+        description: Something went wrong on the server.
+
+  post:
+    security:
+      - bearerAuth: []
+    summary: Add new Project
+    description: Can be accessed only by Authenticated user.
+    requestBody:
+      description: Content of the Projects
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              <<: *projectSchema
+      required: true
+    tags:
+      - projects
+    responses:
+      201:
+        description: A new Projects was successfully created.
+        content:
+          multipart/form-data:
+            schema:
+              <<: *projectSchema
+            example:
+              id:
+                type: string
+                example: 4d65ebcb-a339-4af2-97fb-1a741de66c7d
+              <<: *projectSchema
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      505:
+        description: Something went wrong on the server.
+
+/projects/{id}:
+  get:
+    security:
+      - bearerAuth: []
+    summary: Get a single Project by specified id.
+    description: can be accessed only by authenticated users
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the User to get.
+    tags:
+      - projects
+    responses:
+      200:
+        description: Project successfully get returned.
+        content:
+          multipart/form-data:
+            schema:
+            type: object
+            properties:
+              <<: *projectSchema
+            example:
+              - <<: *projectSchema
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: Project with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+  put:
+    security:
+      - bearerAuth: []
+    summary: Update Single Project with specified id.
+    description: Can be accessed only by user who owns specified account or Admin.
+    requestBody:
+      description: content of the Project
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              <<: *projectSchema
+      required: true
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the Project to get.
+    tags:
+      - projects
+    responses:
+      200:
+        description: Project successfully updated.
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: Project with specified id was not found.
+      505:
+        description: Something went wrong on the server.
+
+  delete:
+    security:
+      - bearerAuth: []
+    summary: Delete Single Project with specified id.
+    description: Can be accessed only by user who owns specified account or an Admin.
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: ID of the Projects to get.
+    tags:
+      - projects
+    responses:
+      204:
+        description: Project successfully deleted.
+      400:
+        description: Request body didn't meet validation requirements.
+      401:
+        description: Authorization information is missing or invalid.
+      404:
+        description: Project with specified id was not found.
+      505:
+        description: Something went wrong on the server.

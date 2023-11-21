@@ -17,7 +17,7 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  const statusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || 505;
 
   logger.error({ id: req.id, error: err });
   res.status(statusCode).json({

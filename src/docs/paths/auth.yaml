@@ -1,0 +1,107 @@
+userSchema: &userSchema
+  type: object
+  properties:
+    firstName:
+      type: string
+      example: name
+    lastName:
+      type: string
+      example: lastname
+    title:
+      type: string
+      example: title
+    summary:
+      type: string
+      example: summary
+    email:
+      type: string
+      example: 'example@example.com'
+    password:
+      type: string
+      example: 'examplePassword'
+    avatar:
+      type: image
+      example: testImage
+
+/auth/register:
+  post:
+    summary: Registers new User
+    description: Can be accessed by anyone
+    requestBody:
+      description: Create new User
+      content:
+        multipart/form-data:
+          schema:
+            <<: *userSchema
+      required: true
+    tags:
+      - auth
+
+    responses:
+      201:
+        description: A user was successfully registered.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+              example:
+                message: 'A user was successfully registered.'
+      400:
+        description: Email field contains an invalid email, or the length of a password is less than 6 characters. Also, when any of the fields are missing.
+      505:
+        description: Something went wrong on the server.
+
+/auth/login:
+  post:
+    summary: Authenticates a user
+    description: Can be accessed by anyone
+    requestBody:
+      description: Authenticate user
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                example: 'example@example.com'
+              password:
+                type: string
+                example: 'examplePassword'
+      required: true
+    tags:
+      - auth
+
+    responses:
+      200:
+        description: A user was successfully logged in. Returns a JWT token and a user object without a password
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                token:
+                  type: string
+
+              example:
+                user:
+                  id: 8e4f5b60-fc95-4d9a-82a9-cf8588e838cf
+                  firstName: name
+                  lastName: LastName
+                  title: title
+                  summary: summary
+                  email: example@email.com
+                  image: public/testEmail@example.com/default.png
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMzQ1Njc4OTAiLCJuYW1lIjoiSm9obiBEb2UifQ.0ySne-ShGZUKOfYi6r-4H-SdwmgNGfROzm77BApYUUk
+      400:
+        description: Email field contains an invalid email, or any of the fields is missing, or a user with the provided credentials does not exist.
+      505:
+        description: Something went wrong on the server.

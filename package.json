@@ -12,8 +12,8 @@
     "migrations:dev:up": "npm run migrations:dev -- up",
     "migrations:dev:down": "npm run migrations:dev -- down",
     "migrations:dev:pending": "npm run migrations:dev -- pending",
+    "migrations:dev:up:admin": "npm run migrations:dev -- up --name 2023.10.25T10.50.44.admin-user.ts",
     "migrations:create": "npm run migrations:dev -- create",
-    "migrations:up:admin": "npm run migrations:dev -- up --name 2023.10.25T10.50.44.admin-user.ts",
     "lint": "npx eslint",
     "lint:fix": "npx eslint --fix",
     "format": "prettier --write .",
@@ -36,7 +36,8 @@
     "pino": "^7.0.0-rc.8",
     "pino-pretty": "^10.2.3",
     "redis": "3.1.2",
-    "sequelize": "6.6.5"
+    "sequelize": "6.6.5",
+    "stoppable": "^1.1.0"
   },
   "devDependencies": {
     "@types/bcrypt": "5.0.0",
@@ -51,8 +52,11 @@
     "@types/passport-jwt": "3.0.6",
     "@types/passport-local": "1.0.34",
     "@types/redis": "2.8.32",
+    "@types/stoppable": "^1.1.3",
     "@types/supertest": "^2.0.15",
+    "@types/swagger-ui-express": "^4.1.6",
     "@types/validator": "13.6.3",
+    "@types/yamljs": "^0.2.34",
     "@typescript-eslint/eslint-plugin": "6.7.5",
     "@typescript-eslint/parser": "6.7.5",
     "cross-env": "7.0.3",
@@ -65,9 +69,11 @@
     "nodemon": "2.0.12",
     "prettier": "3.0.3",
     "supertest": "^6.3.3",
+    "swagger-ui-express": "^5.0.0",
     "ts-jest": "^29.1.1",
     "ts-node": "10.2.1",
     "typescript": "4.4.3",
-    "umzug": "3.0.0-beta.16"
+    "umzug": "3.0.0-beta.16",
+    "yamljs": "^0.3.0"
   }
 }

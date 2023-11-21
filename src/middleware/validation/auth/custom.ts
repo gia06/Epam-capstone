@@ -32,7 +32,6 @@ export class AuthCustomValidators {
   loginEmail(): CustomValidator {
     return async (email: string, { req }) => {
       const user = await this.userService.findByEmail(email);
-
       if (!user) {
         throw new Error(`user with provided email doesn't exist`);
       }

@@ -1,3 +1,7 @@
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 export interface Config {
   db: {
     host: string;
@@ -20,18 +24,18 @@ const configs: {
 } = {
   development: {
     db: {
-      host: 'localhost',
-      port: 3306,
-      username: 'dev',
-      password: 'dev',
-      database: 'capstone_project',
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
     },
     redis: {
-      host: 'localhost',
-      port: 6379,
+      host: process.env.REDIS_HOST,
+      port: +process.env.REDIS_PORT,
     },
     auth: {
-      secret: 'some-dev-secret',
+      secret: process.env.SECRET,
     },
   },
 };

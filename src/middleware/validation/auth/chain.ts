@@ -10,9 +10,6 @@ interface Chain {
 export const validateAuth = (userService: UserService): Chain => {
   const customValidators = new AuthCustomValidators(userService);
 
-  // TODO: need to clarify this destructuring
-  // const { registerEmail } = customValidators;
-
   return {
     register: [
       check('firstName')
